@@ -11,26 +11,16 @@ def load_codici():
 
 mydict = load_codici()
 
-def get_birthplace(birthplace, birthprov):
+def get_birthplace(birthplace):
     birthplace = birthplace.upper()
-    birthprov = birthprov.upper()
 
-    if birthplace == 'Y':
-        if birthprov in mydict:
-            birthprov = mydict[birthprov]
-            return birthprov, birthprov
-        else:
-            print(f"Error: '{birthprov}' not found in mydict")
-            return None, None
+    if birthplace in mydict:
+        return mydict[birthplace]
     else:
-        if birthplace in mydict:
-            birthplace = mydict[birthplace]
-            return birthprov, birthplace
-        else:
-            print(f"Error: '{birthplace}' not found in mydict")
-            return None, None
+        print(f"Error: '{birthplace}' not found in mydict")
+        return None
 
-def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex, birthplace, birthprov):
+def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex, birthplace):
     vowels = ['A', 'E', 'I', 'O', 'U']
     
     surname = surname.upper()
@@ -61,20 +51,16 @@ def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex
     }
     birthmonth = month_mapping.get(birthmonth, '')
     
-    birthday = str(birthday)
-    if len(birthday) == 1:
-        birthday = '0' + birthday
     if sex == 'F':
         birthday += 40
+    birthday = str(birthday)
 
-    birthprov, birthplace = get_birthplace(birthplace, birthprov)
+    birthplace = get_birthplace(birthplace)
 
-    surname_str = ''.join(surname)
-    name_str = ''.join(name)
+    surname = ''.join(surname)
+    name = ''.join(name)
 
-    #verification_bit = get_verification_bit(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov)
-
-    return surname_str + name_str + str(birthyear) + str(birthmonth) + str(birthday) + str(birthplace) + str(birthprov)
+    return surname + name + str(birthyear) + str(birthmonth) + str(birthday) + str(birthplace)
 
     
 def get_verification_bit(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov):
@@ -88,14 +74,14 @@ def input_data():
     birthmonth = int(input("Enter your birth month: "))
     birthday = int(input("Enter your birth day: "))
     sex = input("Enter your sex (M/F): ")
-    birthplace = input("Do you live in Italy? (Y/N): ")
-    if birthplace == 'Y':
-        birthprov = input("Enter your birth province: ")
+    italy = input("Do you live in Italy? (Y/N): ")
+    if italy == 'Y' or italy == 'y':
+        birthplace = input("Enter your the Province you were born in: ")
     else:
-        birthprov = ''
-        birthplace = input("Enter your birth Country: ")        
+        birthplace = input("Enter the country you were born in: ") 
+         
 
-    result = calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov, sex)
+    result = calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex, birthplace)
     print(result)
 
 if __name__ == '__main__':
