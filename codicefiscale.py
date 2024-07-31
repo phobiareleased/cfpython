@@ -2,15 +2,33 @@ import csv
 
 def load_codici():
     codici = {}
-    with open('lista-codici.csv', 'r') as file:
-        reader = csv.reader(file)
+    with open('lista-codici.csv', mode='r') as infile:
+        reader = csv.reader(infile, delimiter=';')  # Specify the correct delimiter
         for row in reader:
             if len(row) >= 2:  # Ensure the row has at least two columns
-                codici[row[0]] = row[1]
+                codici[row[0].upper()] = row[1].upper()  # Store keys and values in uppercase
     return codici
 
 mydict = load_codici()
 
+def get_birthplace(birthplace, birthprov):
+    birthplace = birthplace.upper()
+    birthprov = birthprov.upper()
+
+    if birthplace == 'Y':
+        if birthprov in mydict:
+            birthprov = mydict[birthprov]
+            return birthprov, birthprov
+        else:
+            print(f"Error: '{birthprov}' not found in mydict")
+            return None, None
+    else:
+        if birthplace in mydict:
+            birthplace = mydict[birthplace]
+            return birthprov, birthplace
+        else:
+            print(f"Error: '{birthplace}' not found in mydict")
+            return None, None
 
 def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex, birthplace, birthprov):
     vowels = ['A', 'E', 'I', 'O', 'U']
@@ -26,51 +44,38 @@ def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex
 
     birthyear = str(birthyear)[2:]
 
-    if birthmonth == 1:
-        birthmonth = 'A'
-    elif birthmonth == 2:
-        birthmonth = 'B'
-    elif birthmonth == 3:
-        birthmonth = 'C'
-    elif birthmonth == 4:
-        birthmonth = 'D'
-    elif birthmonth == 5:
-        birthmonth = 'E'
-    elif birthmonth == 6:
-        birthmonth = 'H'
-    elif birthmonth == 7:
-        birthmonth = 'L'
-    elif birthmonth == 8:
-        birthmonth = 'M'
-    elif birthmonth == 9:
-        birthmonth = 'P'
-    elif birthmonth == 10:
-        birthmonth = 'R'
-    elif birthmonth == 11:
-        birthmonth = 'S'
-    elif birthmonth == 12:
-        birthmonth = 'T'
+    birthmonth = str(birthmonth)
+    month_mapping = {
+        '1': 'A',
+        '2': 'B',
+        '3': 'C',
+        '4': 'D',
+        '5': 'E',
+        '6': 'H',
+        '7': 'L',
+        '8': 'M',
+        '9': 'P',
+        '10': 'R',
+        '11': 'S',
+        '12': 'T'
+    }
+    birthmonth = month_mapping.get(birthmonth, '')
     
     birthday = str(birthday)
+    if len(birthday) == 1:
+        birthday = '0' + birthday
     if sex == 'F':
         birthday += 40
 
     birthprov, birthplace = get_birthplace(birthplace, birthprov)
 
-    verification_bit = get_verification_bit(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov)
-    return birthplace, birthprov
+    surname_str = ''.join(surname)
+    name_str = ''.join(name)
 
+    #verification_bit = get_verification_bit(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov)
 
-def get_birthplace(birthplace, birthprov):
-    birthplace = birthplace.upper()
-    birthprov = birthprov.upper()
+    return surname_str + name_str + str(birthyear) + str(birthmonth) + str(birthday) + str(birthplace) + str(birthprov)
 
-    if birthplace == 'Y':
-        birthprov = 'Z' + mydict[birthprov]
-        return birthprov, birthprov
-    else:
-        birthplace = mydict[birthplace]
-        return birthprov, birthplace
     
 def get_verification_bit(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov):
     #define later
@@ -82,6 +87,7 @@ def input_data():
     birthyear = int(input("Enter your birth year: "))
     birthmonth = int(input("Enter your birth month: "))
     birthday = int(input("Enter your birth day: "))
+    sex = input("Enter your sex (M/F): ")
     birthplace = input("Do you live in Italy? (Y/N): ")
     if birthplace == 'Y':
         birthprov = input("Enter your birth province: ")
@@ -89,6 +95,8 @@ def input_data():
         birthprov = ''
         birthplace = input("Enter your birth Country: ")        
 
-    calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov)
+    result = calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, birthplace, birthprov, sex)
+    print(result)
 
-get_birthplace('Roma', 'RM')
+if __name__ == '__main__':
+    input_data()
