@@ -1,5 +1,6 @@
 import csv
 
+# Import the codici catastali from the csv file
 def load_codici():
     codici = {}
     with open('lista-codici.csv', mode='r') as infile:
@@ -11,14 +12,15 @@ def load_codici():
 
 mydict = load_codici()
 
+# Search for the birthplace in the dictionary
 def get_birthplace(birthplace):
     birthplace = birthplace.upper()
 
     if birthplace in mydict:
         return mydict[birthplace]
     else:
-        print(f"Error: '{birthplace}' not found in mydict")
-        return None
+        print(f"Error: '{birthplace}' no Country or Province found in database")
+        exit()
 
 def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex, birthplace):
 
@@ -27,51 +29,48 @@ def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex
     surname = list(filter(str.isalpha, surname.upper()))  # Filter out non-alphabetic characters and convert to uppercase
     name = list(filter(str.isalpha, name.upper()))  # Filter out non-alphabetic characters and convert to uppercase
 
+    # Iterate over the surname and name to create two seperate arrays of ordered consonants and vowels
     surname_consonants = [char for char in surname if char not in vowels]
     surname_vowels = [char for char in surname if char in vowels]
     name_consonants = [char for char in name if char not in vowels]
     name_vowels = [char for char in name if char in vowels]
 
+    # Calculate the surname code
     if len(surname_consonants) >= 3:
         surname = surname_consonants[:3]
-    elif len(surname_consonants) == 2:
+    elif len(surname_consonants) == 2 and len(surname_vowels) >= 1:
         surname = surname_consonants + surname_vowels[:1]
-    elif len(surname_consonants) == 1:
+    elif len(surname_consonants) == 1 and len(surname_vowels) >= 2:
         surname = surname_consonants + surname_vowels[:2]
-    else:
-        surname = surname_consonants + surname_vowels[:3] 
+    elif len(surname) < 3:
+        surname = surname + 'X' * (3 - len(surname))
 
+    # Calculate the name code
     if len(name_consonants) >= 4:
         name = name_consonants[0] + name_consonants[2] + name_consonants[3]
     elif len(name_consonants) == 3:
         name = name_consonants 
-    elif len(name_consonants) == 2:
+    elif len(name_consonants) == 2 and len(name_vowels) >= 1:
         name = name_consonants + name_vowels[:1]
-    elif len(name_consonants) == 1:
+    elif len(name_consonants) == 1 and len(name_vowels) >= 2:
         name = name_consonants + name_vowels[:2]
-    else:
+    elif len(name_consonants) == 0 and len(name_vowels) >= 3:
         name = name_vowels[:3]
+    elif len(name) < 3:
+        name = name + 'X' * (3 - len(name))
     
     birthyear = str(birthyear)[2:]
 
     birthmonth = str(birthmonth)
+
     month_mapping = {
-        '1': 'A',
-        '2': 'B',
-        '3': 'C',
-        '4': 'D',
-        '5': 'E',
-        '6': 'H',
-        '7': 'L',
-        '8': 'M',
-        '9': 'P',
-        '10': 'R',
-        '11': 'S',
-        '12': 'T'
+        '1': 'A','2': 'B','3': 'C','4': 'D','5': 'E','6': 'H',
+        '7': 'L','8': 'M','9': 'P','10': 'R','11': 'S','12': 'T'
     }
+
     birthmonth = month_mapping.get(birthmonth, '')
     
-    if sex == 'F':
+    if sex == 'F' or 'f':
         birthday += 40
     
     if birthday < 10:
@@ -120,13 +119,12 @@ def get_verification_bit(codice_fiscale_incomplete):
             even_sum += even_mapping[char]
     
     total_sum = odd_sum + even_sum
-    remainder = total_sum % 26
-    verification_bit = remainder_mapping[remainder]
+    remainder = total_sum % 26 # Calculate the remainder of the total sum divided by 26
+    verification_bit = remainder_mapping[remainder] # Retrieve the verification bit from the remainder mapping
     
     return verification_bit
 
 def input_data():
-
     surname = input("Enter your surname: ")
     name = input("Enter your name: ")
 
