@@ -22,49 +22,36 @@ def get_birthplace(birthplace):
 
 def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex, birthplace):
 
-    def get_surname_code(surname):
-        surname = surname.upper()
-        consonants = ''
-        vowels = ''
-        
-        for char in surname:
-            if char.isalpha():
-                if char not in 'AEIOU':
-                    consonants += char
-                else:
-                    vowels += char
-        
-        if len(consonants) >= 3:
-            return consonants[:3]
-        elif len(consonants) > 0:
-            return consonants + vowels[:3-len(consonants)]
-        else:
-            return 'X' * 3
-        
-    def get_name_code(name):
-        name = name.upper()
-        consonants = ''
-        vowels = ''
+    vowels = ['A', 'E', 'I', 'O', 'U']
 
-        for char in name:
-            if char.isalpha():
-                if char not in 'AEIOU':
-                    consonants += char
-                else:
-                    vowels += char
+    surname = list(filter(str.isalpha, surname.upper()))  # Filter out non-alphabetic characters and convert to uppercase
+    name = list(filter(str.isalpha, name.upper()))  # Filter out non-alphabetic characters and convert to uppercase
 
-        if len(consonants) >= 3:
-            return consonants[:3]
-        elif len(consonants) > 0:
-            return consonants + vowels[:3-len(consonants)]
-        elif name == 'XXX':
-            return 'XXX'
-        else:
-            return 'X' * 3
+    surname_consonants = [char for char in surname if char not in vowels]
+    surname_vowels = [char for char in surname if char in vowels]
+    name_consonants = [char for char in name if char not in vowels]
+    name_vowels = [char for char in name if char in vowels]
 
-    surname_code = get_surname_code(surname)
-    name_code = get_name_code(name)
+    if len(surname_consonants) >= 3:
+        surname = surname_consonants[:3]
+    elif len(surname_consonants) == 2:
+        surname = surname_consonants + surname_vowels[:1]
+    elif len(surname_consonants) == 1:
+        surname = surname_consonants + surname_vowels[:2]
+    else:
+        surname = surname_consonants + surname_vowels[:3] 
 
+    if len(name_consonants) >= 4:
+        name = name_consonants[0] + name_consonants[2] + name_consonants[3]
+    elif len(name_consonants) == 3:
+        name = name_consonants 
+    elif len(name_consonants) == 2:
+        name = name_consonants + name_vowels[:1]
+    elif len(name_consonants) == 1:
+        name = name_consonants + name_vowels[:2]
+    else:
+        name = name_vowels[:3]
+    
     birthyear = str(birthyear)[2:]
 
     birthmonth = str(birthmonth)
@@ -149,7 +136,7 @@ def input_data():
 
     sex = input("Enter your sex (M/F): ")
 
-    italy = input("Do you live in Italy? (Y/N): ")
+    italy = input("Were you born in Italy? (Y/N): ")
     if italy == 'Y' or italy == 'y':
         birthplace = input("Please enter the Province you were born in: ")
     else:
