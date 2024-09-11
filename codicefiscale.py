@@ -70,7 +70,7 @@ def calculate_codice_fiscale(surname, name, birthyear, birthmonth, birthday, sex
 
     birthmonth = month_mapping.get(birthmonth, '')
     
-    if sex == 'F' or 'f':
+    if sex == 'F' or sex == 'f':
         birthday += 40
     
     if birthday < 10:
